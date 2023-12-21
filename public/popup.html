@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rails Routes</title>
+    <style>
+      .hide {
+        display: none;
+      }
+      .buttons {
+        width: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="buttons">
+      <button id="config">設定</button>
+      <button id="controller">controllerファイルへ飛ぶ</button>
+      <button id="view">view ファイルへ飛ぶ</button>
+    </div>
+
+    <div class="textarea__wrapper hide">
+      <textarea class="textarea"></textarea>
+      <button id="save">保存</button>
+    </div>
+    <script src="popup.bundle.js"></script>
+  </body>
+</html>

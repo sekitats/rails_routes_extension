@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "rails routes",
+  "description": "bun bun bun",
+  "version": "1.0.0",
+  "devtools_page": "devtools.html",
+  "action": {
+    "default_title": "default_title",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.bundle.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.bundle.js"]
+    }
+  ],
+  "permissions": ["tabs", "activeTab", "scripting", "contextMenus"],
+  "host_permissions": ["*://*/*"]
+}
