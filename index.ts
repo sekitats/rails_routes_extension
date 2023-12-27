@@ -23,7 +23,7 @@ if (!Bun.env.DEV_SERVER_PORT) {
   );
 }
 
-const watcher = watch(
+watch(
   import.meta.dir,
   {
     recursive: true,
@@ -36,6 +36,7 @@ const watcher = watch(
         join(srcDir, "popup.ts"),
         join(srcDir, "panel.ts"),
         join(srcDir, "devtools.ts"),
+        join(srcDir, "index.jsx"),
       ],
       outdir: distDir,
       naming: "[name].bundle.[ext]",

@@ -18,7 +18,9 @@
     "types": [
       "bun-types", // add Bun global
       "typescript/lib/lib.d.ts",
-      "chrome"
+      "chrome",
+      "react",
+      "react-dom",
     ]
   }
 }

@@ -5,6 +5,15 @@ const capitalize = (filename: string) => {
   );
 };
 
+export const normalizePath = (originalPath: string): string => {
+  // パス内のプレースホルダーを ":id" に統一し、formatプレースホルダーを削除する
+  const normalizedPath = originalPath
+    .replace(/:(?!format)[a-z_]+/g, ":id") // format以外のプレースホルダーを":id"に統一
+    .replace(/\(\.:format\)/, ""); // (.format)を削除
+
+  return normalizedPath;
+};
+
 export const createPath = (fileType: string, queryResult: any): string => {
   let controller;
   if (typeof queryResult === "string") {

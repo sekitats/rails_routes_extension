@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "rails routes",
-  "description": "bun bun bun",
+  "name": "rails_routes_extension",
+  "description": "Open Rails project's files in editor",
   "version": "1.0.0",
   "devtools_page": "devtools.html",
   "action": {

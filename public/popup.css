@@ -3,8 +3,10 @@ body {
   font-size: 1rem;
 }
 
-.wrapper {
-  padding: 0 1rem;
+h1 {
+  font-size: 1.5rem;
+  white-space: nowrap;
+  margin: 0;
 }
 
 ul {
@@ -12,10 +14,34 @@ ul {
   padding: 0;
 }
 
-.hide {
-  display: none;
+.wrapper {
+  padding: 0 12px;
 }
 
-.buttons {
-  width: 200px;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e5e5;
 }
+
+.config {
+  display: block;
+  width: 36px
+}
+
+.textarea__wrapper {
+  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.textarea {
+  margin-bottom: 0.5rem;
+}
+
+.button__save {
+  align-self: flex-end;
+}
+
