@@ -2,6 +2,8 @@ const INDEXED_DB_NAME = "routes_db";
 const STORE_NAME = "routes";
 const request = indexedDB.open(INDEXED_DB_NAME, 1);
 
+let storedUrls: string[] = [];
+
 request.onupgradeneeded = function (event: any) {
   const db = event.target.result;
 
@@ -20,7 +22,7 @@ request.onupgradeneeded = function (event: any) {
   objectStore.createIndex("controller", "controller", { unique: false });
 };
 
-export const queryByPath = async (path: string): Promise<string[]> => {
+export const searchRoutesByPath = async (path: string): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     let queryResult: string[] = [];
 
@@ -31,11 +33,11 @@ export const queryByPath = async (path: string): Promise<string[]> => {
 
     let query = path.replace(/https?:\/\/[^/]+/, "").replace(/\?.+/, "");
 
-    if (query.match(/\d+/g)) {
-      query = query.replace(/\d+/g, ":id");
+    if (query.match(/\/(\d+)/g)) {
+      query = query.replace(/\/(\d+)/g, "/:id");
     }
 
-    console.log("query:", query);
+    // console.log("query:", query);
 
     const keyRange = IDBKeyRange.only(query);
 
@@ -45,21 +47,19 @@ export const queryByPath = async (path: string): Promise<string[]> => {
       const cursor = event.target.result;
       if (cursor) {
         // マッチしたデータが見つかった場合の処理
-        console.log("Matched route:", cursor.value);
+        console.log(
+          "%cMatched route:",
+          "color:#00d0aa;font-weight:bold;",
+          cursor.value
+        );
         if (cursor.value) {
-          if (cursor.value.method.match(/(POST|PATCH|PUT|DELETE)/)) {
-            // do nothing
-          } else {
-            queryResult.push(cursor.value);
-          }
+          queryResult.push(cursor.value);
         }
         cursor.continue(); // 次のデータを検索
       } else {
         // マッチするデータがもうない場合の処理
-        console.log("No more matching routes.");
+        // console.log("No more matching routes.");
       }
-      console.log("resolved");
-
       resolve(queryResult);
     };
 
@@ -96,3 +96,12 @@ export const addRoutes = (
     console.error("Error adding route: " + event.target.errorCode);
   };
 };
+
+export async function setStorageApiRoutes(urls: string[]) {
+  const uniqueUrls = Array.from(new Set(urls));
+  const res = await Promise.all(
+    uniqueUrls.map((url) => searchRoutesByPath(url))
+  );
+  storedUrls = [...storedUrls, ...res.flatMap((r) => r)];
+  sessionStorage.setItem("urls", JSON.stringify(storedUrls));
+}

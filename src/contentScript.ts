@@ -1,56 +1,40 @@
-import { queryByPath } from "./store";
-import { createPath } from "./path";
+import { searchRoutesByPath, setStorageApiRoutes } from "./store";
+import { openInEditor } from "./path";
+import { ACTION } from "./constants";
 
-async function searchApiController(urls: string[]) {}
-
-async function storeApiRoutes(urls: string[]) {
-  console.log("%cRequestsCompleted", "color:#00d0aa;font-weight:bold;", urls);
-  // alert(urls.join(""));
-  // await queryByPath();
-
-  const res = await Promise.all(urls.flatMap((url) => queryByPath(url)));
-  // console.log(res);
-
-  // const routes = res.flat();
-  // addRoutes(routes);
+if (sessionStorage.getItem("urls")) {
   sessionStorage.removeItem("urls");
-  sessionStorage.setItem("urls", JSON.stringify(urls));
 }
 
-async function searchController() {
-  const res = await queryByPath(window.location.href);
-  if (res) {
-    const path = createPath("controller", { controller: res[0] });
-    window.location.assign(path);
-  }
-}
-
-async function searchView() {
-  const res = await queryByPath(window.location.href);
-  if (res) {
-    const path = createPath("view", { controller: res[0] });
-    window.location.assign(path);
-  }
-}
-
-function saveRoutes(value: any) {
-  chrome.runtime.sendMessage({ action: "storeRoutes", value });
-}
-
-chrome.runtime.onMessage.addListener((request) => {
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   switch (request.action) {
-    case "RequestsCompleted":
-      storeApiRoutes(request.urls);
+    case ACTION.INITIALIZE_FROM_POPUP: {
+      const res = await searchRoutesByPath(window.location.href);
+      chrome.runtime.sendMessage({
+        action: ACTION.INITIALIZE_FROM_CONTENT,
+        value: res[0],
+      });
+    }
+    case ACTION.REQUEST_COMPLETED_FROM_DEVTOOLS:
+      setStorageApiRoutes(request.urls);
       break;
-    case "controller":
-      searchController();
+    case ACTION.OPEN_IN_EDITOR:
+      openInEditor(request.value);
       break;
-    case "view":
-      searchView();
+    case ACTION.SAVE_ROUTES_FROM_POPUP:
+      chrome.runtime.sendMessage({
+        action: ACTION.SAVE_ROUTES_FROM_CONTENT,
+        value: request.value,
+      });
       break;
-    case "storeRoutes":
-      saveRoutes(request.value);
-      break;
+    case ACTION.GET_API_ROUTES_FROM_POPUP: {
+      if (sessionStorage.getItem("urls")) {
+        const urls = sessionStorage.getItem("urls");
+        const parsedUrls = urls && JSON.parse(urls);
+        sendResponse(parsedUrls);
+        break;
+      }
+    }
     default:
       break;
   }

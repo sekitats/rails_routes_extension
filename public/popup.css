@@ -1,0 +1,21 @@
+body {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.wrapper {
+  padding: 0 1rem;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+.hide {
+  display: none;
+}
+
+.buttons {
+  width: 200px;
+}

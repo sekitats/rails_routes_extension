@@ -4,22 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rails Routes</title>
-    <style>
-      .hide {
-        display: none;
-      }
-      .buttons {
-        width: 200px;
-      }
-    </style>
+    <link rel="stylesheet" href="./popup.css" />
   </head>
   <body>
+    <div class="wrapper">
+      <h1>Rails Routes</h1>
+      <div id="api">
+        <p>api controller</p>
+      </div>
+      <div id="controller">
+        <p>controller</p>
+      </div>
+      <div id="view">
+        <p>view</p>
+      </div>
+    </div>
     <div class="buttons">
       <button id="config">設定</button>
-      <button id="controller">controllerファイルへ飛ぶ</button>
-      <button id="view">view ファイルへ飛ぶ</button>
     </div>
-
     <div class="textarea__wrapper hide">
       <textarea class="textarea"></textarea>
       <button id="save">保存</button>

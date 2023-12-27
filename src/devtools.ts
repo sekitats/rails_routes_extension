@@ -1,12 +1,14 @@
-const REQUEST_TIMEOUT = 2000;
+import { ACTION } from "./constants";
+
+const REQUEST_TIMEOUT = 500;
 let timeoutId: number = 0;
 
-const urls: string[] = [];
+let urls: string[] = [];
 
 const handleRequestAdded = (): void => {
   window.clearTimeout(timeoutId);
 
-  // 2秒間リクエストがなければ、リクエスト完了とみなす
+  // 500ms間リクエストがなければ、リクエスト完了とみなす
   timeoutId = window.setTimeout(() => {
     document.dispatchEvent(new CustomEvent("RequestsCompleted"));
   }, REQUEST_TIMEOUT);
@@ -15,7 +17,7 @@ const handleRequestCompleted = (): void => {
   // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   chrome.runtime.sendMessage(
     {
-      action: "RequestsCompleted",
+      action: ACTION.REQUEST_COMPLETED_FROM_DEVTOOLS,
       urls,
     },
     (_) => {
@@ -26,6 +28,7 @@ const handleRequestCompleted = (): void => {
       }
     }
   );
+  urls = [];
   // });
 };
 document.addEventListener("RequestAdded", handleRequestAdded);
