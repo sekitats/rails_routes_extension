@@ -2,16 +2,12 @@ import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { ACTION } from "./constants";
 import { createPath } from "./path";
+import { Route } from "./store";
 
 // @ts-ignore
 const domain = DOMAIN_NAME || "http://localhost:3000";
 const root = createRoot(document.getElementById("root")!);
 
-interface Route {
-  method: string;
-  path: string;
-  controller: string;
-}
 interface Params {
   action: string;
   value?: Route | string;
@@ -43,23 +39,23 @@ const PathList = (props: Props) => {
   );
 };
 
+const sendMessageToContent = async (
+  params: Params
+): Promise<Route[] | string> => {
+  const [tab] = await chrome.tabs.query({
+    currentWindow: true,
+    active: true,
+  });
+  const response = await chrome.tabs.sendMessage(tab.id!, params);
+  return response;
+};
+
 const App = () => {
   const [isShown, toggleTextarea] = useState(false);
   const [textareaValue, setTextareaValue] = useState("");
   const [apiPaths, setApiPaths] = useState<string[]>([]);
   const [controllerPaths, setControllerPaths] = useState<string[]>([]);
   const [viewPaths, setViewPaths] = useState<string[]>([]);
-
-  const sendMessageToContent = async (
-    params: Params
-  ): Promise<Route[] | string> => {
-    const [tab] = await chrome.tabs.query({
-      currentWindow: true,
-      active: true,
-    });
-    const response = await chrome.tabs.sendMessage(tab.id!, params);
-    return response;
-  };
 
   useEffect(() => {
     (async () => {
@@ -94,9 +90,12 @@ const App = () => {
     setTextareaValue(e.target.value);
   };
 
-  const handleClickSave = () => {
+  const handleClickSave = async () => {
     if (!textareaValue) return;
-    // TODO: 保存処理
+    await sendMessageToContent({
+      action: ACTION.SAVE_ROUTES_FROM_POPUP,
+      value: textareaValue,
+    });
     window.close();
   };
 

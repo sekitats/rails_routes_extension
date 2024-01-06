@@ -1,4 +1,9 @@
-import { searchRoutesByPath, setApiRoutesToStorage } from "./store";
+import {
+  addRoutes,
+  normalizeRoutes,
+  searchRoutesByPath,
+  setApiRoutesToStorage,
+} from "./store";
 import { openInEditor } from "./path";
 import { ACTION } from "./constants";
 
@@ -25,18 +30,16 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       openInEditor(request.value);
       break;
     case ACTION.SAVE_ROUTES_FROM_POPUP:
-      chrome.runtime.sendMessage({
-        action: ACTION.SAVE_ROUTES_FROM_CONTENT,
-        value: request.value,
-      });
+      const routes = normalizeRoutes(request.value);
+      addRoutes(routes);
       break;
     case ACTION.GET_API_ROUTES_FROM_POPUP: {
       if (sessionStorage.getItem("urls")) {
         const urls = sessionStorage.getItem("urls");
         const parsedUrls = urls && JSON.parse(urls);
         sendResponse(parsedUrls);
-        break;
       }
+      break;
     }
     default:
       break;

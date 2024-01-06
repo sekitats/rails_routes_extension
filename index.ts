@@ -33,7 +33,6 @@ watch(
       entrypoints: [
         join(srcDir, "background.ts"),
         join(srcDir, "contentScript.ts"),
-        join(srcDir, "popup.ts"),
         join(srcDir, "panel.ts"),
         join(srcDir, "devtools.ts"),
         join(srcDir, "index.jsx"),

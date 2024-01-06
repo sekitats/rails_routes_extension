@@ -1,47 +1,37 @@
 const INDEXED_DB_NAME = "routes_db";
 const STORE_NAME = "routes";
-let db: IDBDatabase;
+const openReq = indexedDB.open(INDEXED_DB_NAME, 1);
 
 let storedUrls: string[] = [];
 
-function createDb() {
-  const openReq = indexedDB.open(INDEXED_DB_NAME, 1);
-
-  openReq.onupgradeneeded = function (event: IDBVersionChangeEvent) {
-    console.log("onupgradeneeded");
-  };
-
-  openReq.onsuccess = function (event) {
-    const target = event.target as IDBOpenDBRequest;
-    db = target?.result as IDBDatabase;
-
-    // 既存のストアがあれば削除
-    if (db.objectStoreNames.contains(STORE_NAME)) {
-      db.deleteObjectStore(STORE_NAME);
-    }
-
-    // 新しいストアを作成
-    const objectStore = db.createObjectStore(STORE_NAME, {
-      keyPath: "id",
-      autoIncrement: true,
-    });
-    // objectStore.createIndex("method", "method", { unique: false });
-    // objectStore.createIndex("path", "path", { unique: false });
-    // objectStore.createIndex("controller", "controller", { unique: false });
-  };
-
-  openReq.onerror = function (event) {
-    console.error("IndexedDBのオープンに失敗しました。");
-  };
+export interface Route {
+  method: string;
+  path: string;
+  controller: string;
 }
 
-createDb();
+openReq.onupgradeneeded = function (event: IDBVersionChangeEvent) {
+  // 既存のストアがあれば削除
+  // if (idb.objectStoreNames.contains(STORE_NAME)) {
+  //   idb.deleteObjectStore(STORE_NAME);
+  // }
+
+  const target = event.target as IDBOpenDBRequest;
+  const db = target?.result as IDBDatabase;
+
+  // 新しいストアを作成
+  const objectStore = db.createObjectStore(STORE_NAME, {
+    keyPath: "id",
+    autoIncrement: true,
+  });
+  objectStore.createIndex("path", "path", { unique: false });
+};
 
 export const searchRoutesByPath = async (path: string): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     let queryResult: string[] = [];
 
-    const transaction = db.transaction([STORE_NAME], "readonly");
+    const transaction = openReq.result.transaction([STORE_NAME], "readonly");
     const objectStore = transaction.objectStore(STORE_NAME);
     const index = objectStore.index("path");
 
@@ -82,28 +72,55 @@ export const searchRoutesByPath = async (path: string): Promise<any[]> => {
   });
 };
 
+const normalizePath = (originalPath: string): string => {
+  // パス内のプレースホルダーを ":id" に統一し、formatプレースホルダーを削除する
+  const normalizedPath = originalPath
+    .replace(/:(?!format)[a-z_]+/g, ":id") // format以外のプレースホルダーを":id"に統一
+    .replace(/\(\.:format\)/, ""); // (.format)を削除
+
+  return normalizedPath;
+};
+
+export const normalizeRoutes = (value: string): Route[] => {
+  const uppercaseLineRegex = /^\s+([A-Z]+)\s+(\S+)\s+(.+)/;
+  const lowercaseLineRegex = /^\s+(\S+)\s+([A-Z]+)\s+(\S+)\s+(.+)/;
+  const lines = value.split("\n").filter((l) => !!l);
+  const routes = lines.map((line: string) => {
+    if (line.match(uppercaseLineRegex)) {
+      const match1 = line.match(uppercaseLineRegex);
+      if (!match1) return undefined;
+      let [, method, path, controller] = match1;
+      return {
+        method,
+        path: normalizePath(path),
+        controller: controller.replace(/\s{.*}/, ""),
+      };
+    } else if (line.match(lowercaseLineRegex)) {
+      const match2 = line.match(lowercaseLineRegex);
+      if (!match2) return undefined;
+      let [, , method, path, controller] = match2;
+      return {
+        method,
+        path: normalizePath(path),
+        controller: controller.replace(/\s{.*}/, ""),
+      };
+    }
+    return undefined;
+  });
+
+  return routes.filter(Boolean) as Route[];
+};
+
 /*
  * add Routes
  */
-export const addRoutes = (
-  routes: {
-    method: string;
-    path: string;
-    rest: string[];
-    controller: string;
-  }[]
-) => {
-  const openReq = indexedDB.open(INDEXED_DB_NAME, 1);
-  openReq.onsuccess = function (event) {
-    const target = event.target as IDBOpenDBRequest;
-    const db = target?.result as IDBDatabase;
-
-    const transaction = db.transaction([STORE_NAME], "readwrite");
-    const store = transaction.objectStore(STORE_NAME);
-    routes.forEach((route) => {
-      store.add(route);
-    });
-  };
+export const addRoutes = (routes: Route[]) => {
+  const db = openReq.result;
+  const transaction = db.transaction([STORE_NAME], "readwrite");
+  const store = transaction.objectStore(STORE_NAME);
+  routes.forEach((route) => {
+    store.add(route);
+  });
 };
 
 export async function setApiRoutesToStorage(urls: string[]) {
