@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "rails_routes_extension",
+  "name": "open ruby in editor",
   "description": "Open Rails project's files in editor",
   "version": "1.0.0",
   "devtools_page": "devtools.html",

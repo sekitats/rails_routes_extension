@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import { ACTION } from "./constants";
 import { createPath } from "./path";
 
+// @ts-ignore
+const domain = DOMAIN_NAME || "http://localhost:3000";
 const root = createRoot(document.getElementById("root")!);
 
 interface Route {
@@ -25,9 +27,9 @@ const PathList = (props: Props) => {
   return (
     <ul>
       {paths.map((path) => (
-        <li>
+        <li key={path}>
           <a
-            href={path}
+            href="#"
             onClick={(e) => {
               e.preventDefault;
               onClickPath(path);
@@ -101,7 +103,7 @@ const App = () => {
   return (
     <div className="wrapper">
       <div className="header">
-        <h1>rails routes</h1>
+        <h1>Open In Editor</h1>
         <a
           className="config"
           href="#"
@@ -152,7 +154,7 @@ const App = () => {
           <div className="view__wrapper">
             {viewPaths.length > 0 && <p>view</p>}
             <PathList
-              paths={controllerPaths}
+              paths={viewPaths}
               onClickPath={(path) => {
                 sendMessageToContent({
                   action: ACTION.OPEN_IN_EDITOR,
@@ -160,6 +162,12 @@ const App = () => {
                 });
               }}
             />
+          </div>
+          <hr />
+          <div className="link">
+            <a href={domain + "rails/info/routes"} target="_blank">
+              Rails routes
+            </a>
           </div>
         </div>
       )}

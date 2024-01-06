@@ -41,7 +41,9 @@ watch(
       outdir: distDir,
       naming: "[name].bundle.[ext]",
       define: {
+        DOMAIN_NAME: JSON.stringify(Bun.env.DOMAIN_NAME),
         DEV_SERVER_PORT: JSON.stringify(Bun.env.DEV_SERVER_PORT),
+        RUBY_TEMPLATE_ENGINE: JSON.stringify(Bun.env.RUBY_TEMPLATE_ENGINE),
       },
     });
     await Bun.write(join(distDir, "popup.html"), popup);

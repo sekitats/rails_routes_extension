@@ -31,7 +31,10 @@ export const createPath = (fileType: string, queryResult: any): string => {
       ? "app/javascript/packs/components/pages/" +
           fileName +
           `/${capitalize(action)}.vue`
-      : "app/views/" + fileName + `/${action}.html.slim`;
+      : "app/views/" +
+          fileName +
+          // @ts-ignore
+          `/${action}.html.${RUBY_TEMPLATE_ENGINE || "slim"}`;
   }
 };
 

@@ -28,38 +28,38 @@ const clickCallback = async (action: string, value?: any): Promise<void> => {
   await sendMessageToContent(params);
 };
 
-save.addEventListener("click", async () => {
-  const value = textarea.value;
-  if (!value) return;
+// save.addEventListener("click", async () => {
+//   const value = textarea.value;
+//   if (!value) return;
 
-  const uppercaseLineRegex = /^\s+([A-Z]+)\s+(\S+)\s+(.+)$/;
-  const lowercaseLineRegex = /^\s+([a-z]+)\s+(\S+)\s+(\S+)\s+(.+)$/;
+//   const uppercaseLineRegex = /^\s+([A-Z]+)\s+(\S+)\s+(.+)$/;
+//   const lowercaseLineRegex = /^\s+([a-z]+)\s+(\S+)\s+(\S+)\s+(.+)$/;
 
-  const lines = value.split("\n").filter(Boolean);
-  const routes = lines
-    .map((line: string) => {
-      if (line.match(uppercaseLineRegex)) {
-        const match1 = line.match(uppercaseLineRegex);
-        if (!match1) return undefined;
-        let [, method, path, controller] = match1;
-        return {
-          method,
-          path: normalizePath(path),
-          controller,
-        };
-      } else if (line.match(lowercaseLineRegex)) {
-        const match2 = line.match(lowercaseLineRegex);
-        if (!match2) return undefined;
-        let [, , method, path, controller] = match2;
-        return {
-          method,
-          path: normalizePath(path),
-          controller,
-        };
-      } else;
-    })
-    .filter(Boolean);
+//   const lines = value.split("\n").filter(Boolean);
+//   const routes = lines
+//     .map((line: string) => {
+//       if (line.match(uppercaseLineRegex)) {
+//         const match1 = line.match(uppercaseLineRegex);
+//         if (!match1) return undefined;
+//         let [, method, path, controller] = match1;
+//         return {
+//           method,
+//           path: normalizePath(path),
+//           controller,
+//         };
+//       } else if (line.match(lowercaseLineRegex)) {
+//         const match2 = line.match(lowercaseLineRegex);
+//         if (!match2) return undefined;
+//         let [, , method, path, controller] = match2;
+//         return {
+//           method,
+//           path: normalizePath(path),
+//           controller,
+//         };
+//       } else;
+//     })
+//     .filter(Boolean);
 
-  await clickCallback(ACTION.SAVE_ROUTES_FROM_POPUP, routes);
-  window.close();
-});
+//   await clickCallback(ACTION.SAVE_ROUTES_FROM_POPUP, routes);
+//   window.close();
+// });

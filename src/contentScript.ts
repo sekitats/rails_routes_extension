@@ -1,4 +1,4 @@
-import { searchRoutesByPath, setStorageApiRoutes } from "./store";
+import { searchRoutesByPath, setApiRoutesToStorage } from "./store";
 import { openInEditor } from "./path";
 import { ACTION } from "./constants";
 
@@ -9,14 +9,17 @@ if (sessionStorage.getItem("urls")) {
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   switch (request.action) {
     case ACTION.INITIALIZE_FROM_POPUP: {
-      const res = await searchRoutesByPath(window.location.href);
-      chrome.runtime.sendMessage({
-        action: ACTION.INITIALIZE_FROM_CONTENT,
-        value: res[0],
-      });
+      const res = await searchRoutesByPath(
+        window.location.href.replace(/\/$/, "")
+      );
+      if (res)
+        chrome.runtime.sendMessage({
+          action: ACTION.INITIALIZE_FROM_CONTENT,
+          value: res[0],
+        });
     }
     case ACTION.REQUEST_COMPLETED_FROM_DEVTOOLS:
-      setStorageApiRoutes(request.urls);
+      setApiRoutesToStorage(request.urls);
       break;
     case ACTION.OPEN_IN_EDITOR:
       openInEditor(request.value);

@@ -1,33 +1,47 @@
 const INDEXED_DB_NAME = "routes_db";
 const STORE_NAME = "routes";
-const request = indexedDB.open(INDEXED_DB_NAME, 1);
+let db: IDBDatabase;
 
 let storedUrls: string[] = [];
 
-request.onupgradeneeded = function (event: any) {
-  const db = event.target.result;
+function createDb() {
+  const openReq = indexedDB.open(INDEXED_DB_NAME, 1);
 
-  // 既存のストアがあれば削除
-  if (db.objectStoreNames.contains("routes")) {
-    db.deleteObjectStore("routes");
-  }
+  openReq.onupgradeneeded = function (event: IDBVersionChangeEvent) {
+    console.log("onupgradeneeded");
+  };
 
-  // 新しいストアを作成
-  const objectStore = db.createObjectStore(STORE_NAME, {
-    keyPath: "id",
-    autoIncrement: true,
-  });
-  objectStore.createIndex("method", "method", { unique: false });
-  objectStore.createIndex("path", "path", { unique: false });
-  objectStore.createIndex("controller", "controller", { unique: false });
-};
+  openReq.onsuccess = function (event) {
+    const target = event.target as IDBOpenDBRequest;
+    db = target?.result as IDBDatabase;
+
+    // 既存のストアがあれば削除
+    if (db.objectStoreNames.contains(STORE_NAME)) {
+      db.deleteObjectStore(STORE_NAME);
+    }
+
+    // 新しいストアを作成
+    const objectStore = db.createObjectStore(STORE_NAME, {
+      keyPath: "id",
+      autoIncrement: true,
+    });
+    // objectStore.createIndex("method", "method", { unique: false });
+    // objectStore.createIndex("path", "path", { unique: false });
+    // objectStore.createIndex("controller", "controller", { unique: false });
+  };
+
+  openReq.onerror = function (event) {
+    console.error("IndexedDBのオープンに失敗しました。");
+  };
+}
+
+createDb();
 
 export const searchRoutesByPath = async (path: string): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     let queryResult: string[] = [];
 
-    const database = request.result;
-    const transaction = database.transaction([STORE_NAME], "readonly");
+    const transaction = db.transaction([STORE_NAME], "readonly");
     const objectStore = transaction.objectStore(STORE_NAME);
     const index = objectStore.index("path");
 
@@ -36,8 +50,6 @@ export const searchRoutesByPath = async (path: string): Promise<any[]> => {
     if (query.match(/\/(\d+)/g)) {
       query = query.replace(/\/(\d+)/g, "/:id");
     }
-
-    // console.log("query:", query);
 
     const keyRange = IDBKeyRange.only(query);
 
@@ -81,23 +93,20 @@ export const addRoutes = (
     controller: string;
   }[]
 ) => {
-  const database = request.result;
-  const transaction = database.transaction([STORE_NAME], "readwrite");
-  const store = transaction.objectStore(STORE_NAME);
-  routes.forEach((route) => {
-    store.add(route);
-  });
+  const openReq = indexedDB.open(INDEXED_DB_NAME, 1);
+  openReq.onsuccess = function (event) {
+    const target = event.target as IDBOpenDBRequest;
+    const db = target?.result as IDBDatabase;
 
-  request.onsuccess = function () {
-    console.log("Route added successfully");
-  };
-
-  request.onerror = function (event: any) {
-    console.error("Error adding route: " + event.target.errorCode);
+    const transaction = db.transaction([STORE_NAME], "readwrite");
+    const store = transaction.objectStore(STORE_NAME);
+    routes.forEach((route) => {
+      store.add(route);
+    });
   };
 };
 
-export async function setStorageApiRoutes(urls: string[]) {
+export async function setApiRoutesToStorage(urls: string[]) {
   const uniqueUrls = Array.from(new Set(urls));
   const res = await Promise.all(
     uniqueUrls.map((url) => searchRoutesByPath(url))

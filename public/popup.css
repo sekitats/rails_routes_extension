@@ -1,6 +1,7 @@
 body {
   margin: 0;
   font-size: 1rem;
+  height: auto;
 }
 
 h1 {
@@ -10,12 +11,11 @@ h1 {
 }
 
 ul {
-  list-style: none;
-  padding: 0;
+  padding-left: 1.5rem;
 }
 
 .wrapper {
-  padding: 0 12px;
+  padding: 12px;
 }
 
 .header {
@@ -45,3 +45,7 @@ ul {
   align-self: flex-end;
 }
 
+.link {
+  display: flex;
+  justify-content: flex-end;
+}
