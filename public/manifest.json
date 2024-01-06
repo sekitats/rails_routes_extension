@@ -8,15 +8,12 @@
     "default_title": "default_title",
     "default_popup": "popup.html"
   },
-  "background": {
-    "service_worker": "background.bundle.js"
-  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": ["contentScript.bundle.js"]
     }
   ],
-  "permissions": ["tabs", "activeTab", "scripting", "contextMenus"],
+  "permissions": ["tabs"],
   "host_permissions": ["*://*/*"]
 }
