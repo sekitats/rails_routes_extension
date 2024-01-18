@@ -8,16 +8,11 @@ import { Route } from "./store";
 const domain = DOMAIN_NAME || "http://localhost:3000";
 const root = createRoot(document.getElementById("root")!);
 
-interface Params {
-  action: string;
-  value?: Route | string;
-}
-
-type Props = {
+interface Props {
   paths: string[];
   onClickPath: (path: string) => void;
-};
-const PathList = (props: Props) => {
+}
+const PathList: React.FC<Props> = (props) => {
   const { paths, onClickPath } = props;
   if (paths.length <= 0) return null;
   return (
@@ -39,6 +34,10 @@ const PathList = (props: Props) => {
   );
 };
 
+interface Params {
+  action: string;
+  value?: string;
+}
 const sendMessageToContent = async (
   params: Params
 ): Promise<Route[] | string> => {
@@ -46,13 +45,13 @@ const sendMessageToContent = async (
     currentWindow: true,
     active: true,
   });
-  const response = await chrome.tabs.sendMessage(tab.id!, params);
-  return response;
+  const res = await chrome.tabs.sendMessage(tab.id!, params);
+  return res;
 };
 
-const App = () => {
-  const [isShown, toggleTextarea] = useState(false);
-  const [textareaValue, setTextareaValue] = useState("");
+const App: React.FC = () => {
+  const [isShown, toggleTextarea] = useState<boolean>(false);
+  const [textareaValue, setTextareaValue] = useState<string>("");
   const [apiPaths, setApiPaths] = useState<string[]>([]);
   const [controllerPaths, setControllerPaths] = useState<string[]>([]);
   const [viewPaths, setViewPaths] = useState<string[]>([]);
@@ -61,13 +60,11 @@ const App = () => {
     (async () => {
       await sendMessageToContent({ action: ACTION.INITIALIZE_FROM_POPUP });
 
-      const response = await sendMessageToContent({
+      const res = (await sendMessageToContent({
         action: ACTION.GET_API_ROUTES_FROM_POPUP,
-      });
-      if (response) {
-        const paths = (response as Route[]).map((res) =>
-          createPath("api", res.controller)
-        );
+      })) as Route[];
+      if (res) {
+        const paths = res.map((res) => createPath("api", res.controller));
         setApiPaths(paths);
       }
     })();

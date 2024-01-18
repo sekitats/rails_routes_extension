@@ -1,4 +1,5 @@
 import {
+  Route,
   addRoutes,
   normalizeRoutes,
   searchRoutesByPath,
@@ -14,14 +15,15 @@ if (sessionStorage.getItem("urls")) {
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   switch (request.action) {
     case ACTION.INITIALIZE_FROM_POPUP: {
-      const res = await searchRoutesByPath(
+      const res = (await searchRoutesByPath(
         window.location.href.replace(/\/$/, "")
-      );
+      )) as Route[];
       if (res)
         chrome.runtime.sendMessage({
           action: ACTION.INITIALIZE_FROM_CONTENT,
           value: res[0],
         });
+      break;
     }
     case ACTION.REQUEST_COMPLETED_FROM_DEVTOOLS:
       setApiRoutesToStorage(request.urls);

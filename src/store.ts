@@ -2,8 +2,6 @@ const INDEXED_DB_NAME = "routes_db";
 const STORE_NAME = "routes";
 const openReq = indexedDB.open(INDEXED_DB_NAME, 1);
 
-let storedUrls: string[] = [];
-
 export interface Route {
   method: string;
   path: string;
@@ -36,15 +34,12 @@ export const searchRoutesByPath = async (path: string): Promise<any[]> => {
     const index = objectStore.index("path");
 
     let query = path.replace(/https?:\/\/[^/]+/, "").replace(/\?.+/, "");
-
     if (query.match(/\/(\d+)/g)) {
       query = query.replace(/\/(\d+)/g, "/:id");
     }
 
     const keyRange = IDBKeyRange.only(query);
-
     const cursorRequest = index.openCursor(keyRange);
-
     cursorRequest.onsuccess = (event: any) => {
       const cursor = event.target.result;
       if (cursor) {
@@ -88,7 +83,7 @@ export const normalizeRoutes = (value: string): Route[] => {
   const routes = lines.map((line: string) => {
     if (line.match(uppercaseLineRegex)) {
       const match1 = line.match(uppercaseLineRegex);
-      if (!match1) return undefined;
+      if (!match1) return;
       let [, method, path, controller] = match1;
       return {
         method,
@@ -97,7 +92,7 @@ export const normalizeRoutes = (value: string): Route[] => {
       };
     } else if (line.match(lowercaseLineRegex)) {
       const match2 = line.match(lowercaseLineRegex);
-      if (!match2) return undefined;
+      if (!match2) return;
       let [, , method, path, controller] = match2;
       return {
         method,
@@ -105,7 +100,7 @@ export const normalizeRoutes = (value: string): Route[] => {
         controller: controller.replace(/\s{.*}/, ""),
       };
     }
-    return undefined;
+    return;
   });
 
   return routes.filter(Boolean) as Route[];
@@ -124,6 +119,8 @@ export const addRoutes = (routes: Route[]) => {
 };
 
 export async function setApiRoutesToStorage(urls: string[]) {
+  let storedUrls: string[] = [];
+
   const uniqueUrls = Array.from(new Set(urls));
   const res = await Promise.all(
     uniqueUrls.map((url) => searchRoutesByPath(url))
